@@ -16,7 +16,7 @@ pipeline {
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
 				sh ' echo VAMOS'
-                script{
+//                script{
                     timeout(time: 10, unit: 'MINUTES') {
                         def qg = waitForQualityGate abortPipeline: true
                         if (qg.status != 'OK') {
@@ -24,7 +24,7 @@ pipeline {
                             error "Pipeline aborted due to quality gate failure: ${qg.status}"
                         }
                     }
-                }
+//                }
                         }
                         }
                     }
