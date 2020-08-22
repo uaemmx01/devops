@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+   stages {
+        stage('Build payara asekt'){
+            steps {
+                    echo '####################### BUILDING ASEKT'
+                    dir ('../mads-todolist-inicial') {
+                        script {
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+				sh ' echo VAMOS'
+                        }
+                        }
+                    }
+            }
+       }
+   }
+   post {
+        always {
+            echo 'One way or another, I have finished'
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
+    }
+}
+

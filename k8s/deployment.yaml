@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msasekt
+  namespace: asekt
+  labels:
+          app: msasekt
+spec:
+  replicas: 1
+  selector:
+          matchLabels:
+                  app: msasekt
+  template:
+    metadata:
+      labels:
+        app: msasekt
+    spec:
+      containers:
+      - name: msasekt
+        image:  172.31.34.128:5000/ekt/payaramicro:latest
+        ports:
+        - containerPort: 8080
+        args:
+        - --deployFromGAV
+        - "asekt.configuraciones:ARTIFACTID:VERSIONID"
+        - --additionalRepository
+        - http://172.31.34.128:8081/repository/maven-releases
+        imagePullPolicy: Always
+
