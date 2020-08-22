@@ -4,6 +4,7 @@ pipeline {
    stages {
         stage('Build'){
             steps {
+               withSonarQubeEnv('Sonarqube') {
                     echo '####################### BUILDING ASEKT'
                     dir ('mads-todolist-inicial') {
                         script {
@@ -27,6 +28,7 @@ pipeline {
                         }
                         }
                     }
+               }
             }
        }
    }
