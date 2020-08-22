@@ -5,7 +5,7 @@ pipeline {
         stage('Build payara asekt'){
             steps {
                     echo '####################### BUILDING ASEKT'
-                    dir ('../mads-todolist-inicial') {
+                    dir ('mads-todolist-inicial') {
                         script {
                         status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
                         echo "******************************************************************** Status:  ${status} "
