@@ -17,7 +17,7 @@ pipeline {
                         if (status == 0) {
 				sh ' echo VAMOS'
                                 sh 'curl ec2-3-235-29-59.compute-1.amazonaws.com:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
-                                qg = jsonParse(readFile('qualityGate.json'))
+                                qualitygate = jsonParse(readFile('qualityGate.json'))
                                 echo qualitygate.toString()
                                 if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
          				 error  "Quality Gate failure"
