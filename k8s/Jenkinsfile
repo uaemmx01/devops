@@ -2,12 +2,16 @@ pipeline {
     agent any
 
    stages {
-        stage('Build payara asekt'){
+        stage('Build'){
             steps {
                     echo '####################### BUILDING ASEKT'
                     dir ('mads-todolist-inicial') {
                         script {
-                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
+  -Dsonar.projectKey=demo \
+  -Dsonar.host.url=http://ec2-3-235-29-59.compute-1.amazonaws.com:9000 \
+  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
 				sh ' echo VAMOS'
