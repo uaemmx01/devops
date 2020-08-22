@@ -15,6 +15,7 @@ pipeline {
   -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
+                                sleep 10
 				sh ' echo VAMOS'
                                 sh 'curl ec2-3-235-29-59.compute-1.amazonaws.com:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
                                 qualitygate = readJSON file:'qualityGate.json'
