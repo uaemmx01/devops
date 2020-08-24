@@ -41,7 +41,9 @@ pipeline {
                            sh 'docker build -t msdemo:0.0.1 dockerized/.'
                            sh 'docker tag msdemo:0.0.1 uaemmx01/msdemo:0.0.1'
                            sh 'docker push uaemmx01/msdemo:0.0.1'
-                           sh 'kubectl apply -f deployment.yaml'
+                           withKubeConfig([credentialsId: 'minikube']) {
+				sh 'kubectl apply -f deployment.yaml'
+ 			   }
 		}
               }
             }
