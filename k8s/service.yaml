@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mscambiofisico
-  namespace: desarrollo
+  name: msdemo
+  namespace: dev
 spec:
   ports:
   - port: 80
@@ -10,5 +10,5 @@ spec:
     protocol: TCP
     name: http
   selector:
-    name: mscambiofisico
+    name: msdemo
 

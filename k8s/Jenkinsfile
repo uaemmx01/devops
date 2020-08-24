@@ -1,8 +1,11 @@
 pipeline {
-    agent any
-
+   agent any
+   environment {
+        DockerRegistry = ''
+        ImageName = 'ct:latest'
+   }
    stages {
-        stage('Build'){
+        stage('Continuous Integration'){
             steps {
                withSonarQubeEnv('Sonarqube') {
                     echo '####################### BUILDING ASEKT'
@@ -17,6 +20,7 @@ pipeline {
                         if (status == 0) {
                                 sleep 10
 				sh ' echo VAMOS'
+                                sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
                                 sh 'curl ec2-3-235-29-59.compute-1.amazonaws.com:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
                                 qualitygate = readJSON file:'qualityGate.json'
                                 echo "${qualitygate.projectStatus.status}"
@@ -29,7 +33,19 @@ pipeline {
                     }
                }
             }
-       }
+        }
+	stage ('Deploy') {
+            steps {
+              dir ('k8s') {
+		script {
+                           sh 'docker build -t msdemo:0.0.1 dockerized/.'
+                           sh 'docker tag msdemo:0.0.1 uaemmx01/msdemo:0.0.1'
+                           sh 'docker push uaemmx01/msdemo:0.0.1'
+                           sh 'kubectl apply -f deployment.yaml'
+		}
+              }
+            }
+	}
    }
    post {
         always {

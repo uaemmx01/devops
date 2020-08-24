@@ -1,8 +1,8 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: asekt
-  namespace: asekt
+  name: msdemo
+  namespace: dev
 spec:
   rules:
   - host: ec2-54-81-13-249.compute-1.amazonaws.com
@@ -10,10 +10,5 @@ spec:
       paths:
       - path: /ASEKTConfiguracion-0.0.1-SNAPSHOT
         backend:
-          serviceName: msasekt
+          serviceName: msdemo
           servicePort: 80
-      - path: /
-        backend:
-          serviceName: frontasekt
-          servicePort: 80
-

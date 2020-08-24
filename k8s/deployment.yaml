@@ -1,29 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: msasekt
-  namespace: asekt
+  name: msdemo
+  namespace: dev
   labels:
-          app: msasekt
+          app: msdemo
 spec:
   replicas: 1
   selector:
           matchLabels:
-                  app: msasekt
+                  app: msdemo
   template:
     metadata:
       labels:
-        app: msasekt
+        app: msdemo
     spec:
       containers:
-      - name: msasekt
-        image:  172.31.34.128:5000/ekt/payaramicro:latest
+      - name: msdemo
+        image:  uaemmx01/msdemo:0.0.1
         ports:
         - containerPort: 8080
-        args:
-        - --deployFromGAV
-        - "asekt.configuraciones:ARTIFACTID:VERSIONID"
-        - --additionalRepository
-        - http://172.31.34.128:8081/repository/maven-releases
         imagePullPolicy: Always
 
