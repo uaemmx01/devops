@@ -6,6 +6,7 @@
     <groupId>es.ua.mads</groupId>
     <artifactId>mads-todolist-inicial</artifactId>
     <version>1.0.0</version>
+    <packaging>war</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -51,6 +52,13 @@
             <plugin>
           	<groupId>org.jacoco</groupId>
           	<artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+          	<artifactId>maven-war-plugin</artifactId>
+                <configuration>
+			<warSourceDirectory>Target</warSourceDirectory>
+			<failOnMissingWebXml>false</failOnMissingWebXml>
+		</configuration>
             </plugin>
         </plugins>
     </build>
