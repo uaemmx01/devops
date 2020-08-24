@@ -19,6 +19,6 @@ spec:
       - name: msdemo
         image:  uaemmx01/msdemo:0.0.1
         ports:
-        - containerPort: 8080
+        - containerPort: 8085
         imagePullPolicy: Always
 

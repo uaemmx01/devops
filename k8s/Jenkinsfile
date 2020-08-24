@@ -43,6 +43,8 @@ pipeline {
                            sh 'docker push uaemmx01/msdemo:0.0.1'
                            withKubeConfig([credentialsId: 'minikube']) {
 				sh 'kubectl apply -f deployment.yaml'
+				sh 'kubectl scale deployment msdemo --replicas=0 -n dev'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n dev'
  			   }
 		}
               }
