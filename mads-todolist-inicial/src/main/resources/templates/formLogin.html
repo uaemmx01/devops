@@ -14,7 +14,7 @@
 
     <div class="row justify-content-center">
         <div class="col-6">
-            <form method="post" th:action="@{/login}" th:object="${loginData}">
+            <form method="post" th:action="@{/mads-todolist-inicial-1.0.0/login}" th:object="${loginData}">
                 <div class="row justify-content-center">
                     <div class="col-6">
                         <div class="form-group">
@@ -26,7 +26,7 @@
                             <input id="password" class="form-control" name="password"  placeholder="Contraseña" type="password" th:field="*{password}" required/>
                         </div>
                         <button type="submit" class="btn btn-primary">Login</button>
-                        <a class="btn btn-link" href="/registro">Ir a registro</a>
+                        <a class="btn btn-link" href="/mads-todolist-inicial-1.0.0/registro">Ir a registro</a>
             </form>
         </div>
     </div>
