@@ -41,12 +41,12 @@ public class UsuarioWebTest {
         when(usuarioService.login("ana.garcia@gmail.com", "12345678")).thenReturn(UsuarioService.LoginStatus.LOGIN_OK);
         when(usuarioService.findByEmail("ana.garcia@gmail.com")).thenReturn(anaGarcia);
 
-        this.mockMvc.perform(post("/mads-todolist-inicial-1.0.0/login")
+        this.mockMvc.perform(post("/login")
                 .param("eMail", "ana.garcia@gmail.com")
                 .param("password", "12345678"))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/mads-todolist-inicial-1.0.0/usuarios/1/tareas"));
+                .andExpect(redirectedUrl("/usuarios/1/tareas"));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class UsuarioWebTest {
 
         when(usuarioService.login("pepito.perez@gmail.com", "12345678")).thenReturn(UsuarioService.LoginStatus.USER_NOT_FOUND);
 
-        this.mockMvc.perform(post("/mads-todolist-inicial-1.0.0/login")
+        this.mockMvc.perform(post("/login")
                     .param("eMail","pepito.perez@gmail.com")
                     .param("password","12345678"))
                 .andDo(print())
@@ -66,7 +66,7 @@ public class UsuarioWebTest {
 
         when(usuarioService.login("ana.garcia@gmail.com", "000")).thenReturn(UsuarioService.LoginStatus.ERROR_PASSWORD);
 
-        this.mockMvc.perform(post("/mads-todolist-inicial-1.0.0/login")
+        this.mockMvc.perform(post("/login")
                     .param("eMail","ana.garcia@gmail.com")
                     .param("password","000"))
                 .andDo(print())
@@ -76,7 +76,7 @@ public class UsuarioWebTest {
 
     @Test
     public void servicioLoginRedirectContraseñaIncorrecta() throws Exception {
-        this.mockMvc.perform(get("/mads-todolist-inicial-1.0.0/login")
+        this.mockMvc.perform(get("/login")
                 .flashAttr("error", "Contraseña incorrecta"))
                 .andDo(print())
                 .andExpect(content().string(containsString("Contraseña incorrecta")));
@@ -84,7 +84,7 @@ public class UsuarioWebTest {
 
     @Test
     public void servicioLoginRedirectUsuarioNotFound() throws Exception {
-        this.mockMvc.perform(get("/mads-todolist-inicial-1.0.0/login")
+        this.mockMvc.perform(get("/login")
                 .flashAttr("error", "No existe usuario"))
                 .andDo(print())
                 .andExpect(content().string(containsString("No existe usuario")));
