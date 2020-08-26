@@ -1,7 +1,7 @@
 pipeline {
    agent any
    environment {
-        SonarServer = 'ec2-3-236-218-80.compute-1.amazonaws.com'
+        SonarServer = 'localhost'
         ImageName = 'ct:latest'
    }
    stages {
