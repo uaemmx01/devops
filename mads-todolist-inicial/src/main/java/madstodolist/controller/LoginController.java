@@ -27,16 +27,16 @@ public class LoginController {
 
     @GetMapping("/")
     public String home(Model model) {
-        return "redirect:/login";
+        return "redirect:/mads-todolist-inicial-1.0.0/login";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/mads-todolist-inicial-1.0.0/login")
     public String loginForm(Model model) {
         model.addAttribute("loginData", new LoginData());
         return "formLogin";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/mads-todolist-inicial-1.0.0/login")
     public String loginSubmit(@ModelAttribute LoginData loginData, Model model, RedirectAttributes flash, HttpSession session) {
 
         // Llamada al servicio para comprobar si el login es correcto
@@ -47,7 +47,7 @@ public class LoginController {
 
             managerUserSesion.logearUsuario(session, usuario.getId());
 
-            return "redirect:/usuarios/" + usuario.getId() + "/tareas";
+            return "redirect:/mads-todolist-inicial-1.0.0/usuarios/" + usuario.getId() + "/tareas";
         } else if (loginStatus == UsuarioService.LoginStatus.USER_NOT_FOUND) {
             model.addAttribute("error", "No existe usuario");
             return "formLogin";
@@ -58,13 +58,13 @@ public class LoginController {
         return "formLogin";
     }
 
-    @GetMapping("/registro")
+    @GetMapping("/mads-todolist-inicial-1.0.0/registro")
     public String registroForm(Model model) {
         model.addAttribute("registroData", new RegistroData());
         return "formRegistro";
     }
 
-   @PostMapping("/registro")
+   @PostMapping("/mads-todolist-inicial-1.0.0/registro")
    public String registroSubmit(@Valid RegistroData registroData, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
@@ -83,12 +83,12 @@ public class LoginController {
         usuario.setNombre(registroData.getNombre());
 
         usuarioService.registrar(usuario);
-        return "redirect:/login";
+        return "redirect:/mads-todolist-inicial-1.0.0/login";
    }
 
-   @GetMapping("/logout")
+   @GetMapping("/mads-todolist-inicial-1.0.0/logout")
    public String logout(HttpSession session) {
         session.setAttribute("idUsuarioLogeado", null);
-        return "redirect:/login";
+        return "redirect:/mads-todolist-inicial-1.0.0/login";
    }
 }
