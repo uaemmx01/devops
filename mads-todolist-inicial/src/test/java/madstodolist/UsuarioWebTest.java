@@ -46,7 +46,7 @@ public class UsuarioWebTest {
                 .param("password", "12345678"))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/usuarios/1/tareas"));
+                .andExpect(redirectedUrl("/mads-todolist-inicial-1.0.0/usuarios/1/tareas"));
     }
 
     @Test
