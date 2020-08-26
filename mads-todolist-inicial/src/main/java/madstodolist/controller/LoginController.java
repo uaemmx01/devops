@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 @Controller
 @RestController
-@RequestMapping("/mads-todolist-inicial-1.0.0")
+//@RequestMapping("/mads-todolist-inicial-1.0.0")
 public class LoginController {
 
     @Autowired
