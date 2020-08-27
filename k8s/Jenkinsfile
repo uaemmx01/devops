@@ -6,6 +6,9 @@ pipeline {
    }
    stages {
         stage('Continuous Integration'){
+            when {
+                branch 'develop' 
+            }
             steps {
                withSonarQubeEnv('Sonarqube') {
                     echo '####################### BUILDING ASEKT'
@@ -35,6 +38,9 @@ pipeline {
             }
         }
 	stage ('Deploy') {
+            when {
+                branch 'develop' 
+            }
             steps {
               dir ('k8s') {
 		script {
@@ -49,6 +55,14 @@ pipeline {
 		}
               }
             }
+	}
+        stage () {
+            when {
+                branch 'release' 
+            }
+            steps {
+		input message: 'Finished using the web site? (Click "Proceed" to continue)'
+	    }
 	}
    }
    post {
