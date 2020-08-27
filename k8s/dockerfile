@@ -1,3 +1,0 @@
-FROM 172.31.34.128:5000/ekt/payaramicro:latest
-COPY ASEKTConfiguracion-0.0.1-SNAPSHOT.war /opt/payara/deployments
-
