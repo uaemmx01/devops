@@ -1,0 +1,86 @@
+pipeline {
+   agent any
+   environment {
+        SonarServer = 'localhost'
+        ImageName = 'ct:latest'
+   }
+   stages {
+        stage('Continuous Integration'){
+            when {
+                branch 'develop' 
+            }
+            steps {
+               withSonarQubeEnv('Sonarqube') {
+                    echo '####################### BUILDING ASEKT'
+                    dir ('mads-todolist-inicial') {
+                        script {
+                        //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
+  -Dsonar.projectKey=demo \
+  -Dsonar.host.url=http://${SonarServer}:9000 \
+  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+                                sleep 10
+				sh ' echo VAMOS'
+                                sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
+                                sh 'curl ${SonarServer}:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
+                                qualitygate = readJSON file:'qualityGate.json'
+                                echo "${qualitygate.projectStatus.status}"
+                                if ("${qualitygate.projectStatus.status}" == "ERROR") {
+				    currentBuild.result = 'FAILURE'
+				    error('SonarQube quality gate status of a project is failed.')
+				}
+                        }
+                        }
+                    }
+               }
+            }
+        }
+	stage ('Deploy') {
+            when {
+                branch 'develop' 
+            }
+            steps {
+              dir ('k8s') {
+		script {
+                           sh 'docker build -t msdemo:0.0.1 dockerized/.'
+                           sh 'docker tag msdemo:0.0.1 uaemmx01/msdemo:0.0.1'
+                           sh 'docker push uaemmx01/msdemo:0.0.1'
+                           withKubeConfig([credentialsId: 'minikube']) {
+				sh 'kubectl apply -f deployment.yaml'
+				sh 'kubectl scale deployment msdemo --replicas=0 -n dev'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n dev'
+ 			   }
+		}
+              }
+            }
+	}
+        stage ('RELEASE') {
+            when {
+                branch 'release' 
+            }
+            steps {
+		input message: 'Finished using the web site...? (Click "Proceed" to continue)'
+	    }
+	}
+   }
+   post {
+        always {
+            echo 'One way or another, I have finished'
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
+    }
+}
+
