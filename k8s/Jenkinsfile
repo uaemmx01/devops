@@ -5,24 +5,25 @@ pipeline {
         ImageName = 'ct:latest'
    }
    stages {
-        stage('Continuous Integration'){
+        stage('Continuous Integration Build DEV'){
             when {
                 branch 'develop' 
             }
             steps {
                withSonarQubeEnv('Sonarqube') {
-                    echo '####################### BUILDING ASEKT'
+                    echo '####################### BUILDING DEV'
                     dir ('mads-todolist-inicial') {
                         script {
                         //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
                         status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
   -Dsonar.projectKey=demo \
+  -Dsonar.projectName=dev \
   -Dsonar.host.url=http://${SonarServer}:9000 \
   -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
                                 sleep 10
-				sh ' echo VAMOS'
+				sh ' echo STATIC ANALYSIS'
                                 sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
                                 sh 'curl ${SonarServer}:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
                                 qualitygate = readJSON file:'qualityGate.json'
@@ -37,7 +38,7 @@ pipeline {
                }
             }
         }
-	stage ('Deploy') {
+	stage ('Continuos Delivery Deploy DEV') {
             when {
                 branch 'develop' 
             }
@@ -48,7 +49,7 @@ pipeline {
                            sh 'docker tag msdemo:0.0.1 uaemmx01/msdemo:0.0.1'
                            sh 'docker push uaemmx01/msdemo:0.0.1'
                            withKubeConfig([credentialsId: 'minikube']) {
-				sh 'kubectl apply -f deployment.yaml'
+				sh 'kubectl apply -f deployment.yaml -n dev'
 				sh 'kubectl scale deployment msdemo --replicas=0 -n dev'
 				sh 'kubectl scale deployment msdemo --replicas=1 -n dev'
  			   }
@@ -56,13 +57,59 @@ pipeline {
               }
             }
 	}
-        stage ('RELEASE') {
+        stage ('Continuos Integration Build QA') {
             when {
                 branch 'release' 
             }
             steps {
-		input message: 'Finished using the web site...? (Click "Proceed" to continue)'
-	    }
+	//	input message: 'Finished using the web site...? (Click "Proceed" to continue)'
+               withSonarQubeEnv('Sonarqube') {
+                    echo '####################### BUILDING QA'
+                    dir ('mads-todolist-inicial') {
+                        script {
+                        //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
+  -Dsonar.projectKey=demo \
+  -Dsonar.projectName=qa \
+  -Dsonar.host.url=http://${SonarServer}:9000 \
+  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+                                sleep 10
+				sh ' echo STATIC ANALYSIS'
+                                sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
+                                sh 'curl ${SonarServer}:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
+                                qualitygate = readJSON file:'qualityGate.json'
+                                echo "${qualitygate.projectStatus.status}"
+                                if ("${qualitygate.projectStatus.status}" == "ERROR") {
+				    currentBuild.result = 'FAILURE'
+				    error('SonarQube quality gate status of a project is failed.')
+				}
+                        }
+                        }
+                    }
+               }
+            }
+        }
+	stage ('Continuos Delivery Deploy QA') {
+            when {
+                branch 'release' 
+            }
+            steps {
+              dir ('k8s') {
+		script {
+                           sh 'docker build -t msdemoqa:0.0.1 dockerized/.'
+                           sh 'docker tag msdemoqa:0.0.1 uaemmx01/msdemoqa:0.0.1'
+                           sh 'docker push uaemmx01/msdemoqa:0.0.1'
+                           withKubeConfig([credentialsId: 'minikube']) {
+                                sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoqa:0.0.1/g"| kubectl apply -n qa -f -'''
+			//	sh 'kubectl apply -f deployment.yaml -n qa'
+				sh 'kubectl scale deployment msdemoqa --replicas=0 -n qa'
+				sh 'kubectl scale deployment msdemoqa --replicas=1 -n qa'
+ 			   }
+		}
+              }
+            }
 	}
    }
    post {

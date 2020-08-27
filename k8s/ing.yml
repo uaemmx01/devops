@@ -2,10 +2,10 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: msdemo
-  namespace: dev
+  namespace: qa
 spec:
   rules:
-  - host: ec2-3-226-254-132.compute-1.amazonaws.com
+  - host: demo.qa.local
     http:
       paths:
       - path: /mads-todolist-inicial-1.0.0
