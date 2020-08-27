@@ -56,7 +56,7 @@ pipeline {
               }
             }
 	}
-        stage () {
+        stage ('RELEASE') {
             when {
                 branch 'release' 
             }
