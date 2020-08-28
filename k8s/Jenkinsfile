@@ -112,7 +112,7 @@ pipeline {
               }
             }
 	}
-	stage ('Continuos Delivery Deploy PRD') {
+	stage ('Continuos Integration Deploy PRD') {
             when {
                 branch 'master' 
             }
@@ -157,7 +157,7 @@ pipeline {
                            sh 'docker tag msdemoprd:0.0.1 uaemmx01/msdemoprd:0.0.1'
                            sh 'docker push uaemmx01/msdemoprd:0.0.1'
                            withKubeConfig([credentialsId: 'minikube']) {
-                                sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoprd:0.0.1/g"| kubectl apply -n qa -f -'''
+                                sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoprd:0.0.1/g"| kubectl apply -n prd -f -'''
 			//	sh 'kubectl apply -f deployment.yaml -n prd'
                           	sleep 20
 				sh 'kubectl scale deployment msdemoprd --replicas=0 -n prd'
