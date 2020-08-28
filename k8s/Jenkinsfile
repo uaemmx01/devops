@@ -105,8 +105,8 @@ pipeline {
                                 sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoqa:0.0.1/g"| kubectl apply -n qa -f -'''
 			//	sh 'kubectl apply -f deployment.yaml -n qa'
                           	sleep 20
-				sh 'kubectl scale deployment msdemoqa --replicas=0 -n qa'
-				sh 'kubectl scale deployment msdemoqa --replicas=1 -n qa'
+				sh 'kubectl scale deployment msdemo --replicas=0 -n qa'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n qa'
  			   }
 		}
               }
@@ -160,8 +160,8 @@ pipeline {
                                 sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoprd:0.0.1/g"| kubectl apply -n prd -f -'''
 			//	sh 'kubectl apply -f deployment.yaml -n prd'
                           	sleep 20
-				sh 'kubectl scale deployment msdemoprd --replicas=0 -n prd'
-				sh 'kubectl scale deployment msdemoprd --replicas=1 -n prd'
+				sh 'kubectl scale deployment msdemo --replicas=0 -n prd'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n prd'
  			   }
 		}
               }
