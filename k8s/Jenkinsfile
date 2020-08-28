@@ -1,0 +1,189 @@
+pipeline {
+   agent any
+   environment {
+        SonarServer = 'localhost'
+        ImageName = 'ct:latest'
+   }
+   stages {
+        stage('Continuous Integration Build DEV'){
+            when {
+                branch 'develop' 
+            }
+            steps {
+               withSonarQubeEnv('Sonarqube') {
+                    echo '####################### BUILDING DEV'
+                    dir ('mads-todolist-inicial') {
+                        script {
+                        //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
+  -Dsonar.projectKey=dev \
+  -Dsonar.projectName=dev \
+  -Dsonar.host.url=http://${SonarServer}:9000 \
+  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+                                sleep 10
+				sh ' echo STATIC ANALYSIS'
+                                sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
+                                sh 'curl ${SonarServer}:9000/api/qualitygates/project_status?projectKey=dev -o qualityGate.json'
+                                qualitygate = readJSON file:'qualityGate.json'
+                                echo "${qualitygate.projectStatus.status}"
+                                if ("${qualitygate.projectStatus.status}" == "ERROR") {
+				    currentBuild.result = 'FAILURE'
+				    error('SonarQube quality gate status of a project is failed.')
+				}
+                        }
+                        }
+                    }
+               }
+            }
+        }
+	stage ('Continuos Delivery Deploy DEV') {
+            when {
+                branch 'develop' 
+            }
+            steps {
+              dir ('k8s') {
+		script {
+                           sh 'docker build -t msdemo:0.0.1 dockerized/.'
+                           sh 'docker tag msdemo:0.0.1 uaemmx01/msdemo:0.0.1'
+                           sh 'docker push uaemmx01/msdemo:0.0.1'
+                           withKubeConfig([credentialsId: 'minikube']) {
+				sh 'kubectl apply -f deployment.yaml -n dev'
+                          	sleep 20
+				sh 'kubectl scale deployment msdemo --replicas=0 -n dev'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n dev'
+ 			   }
+		}
+              }
+            }
+	}
+        stage ('Continuos Integration Build QA') {
+            when {
+                branch 'release' 
+            }
+            steps {
+               withSonarQubeEnv('Sonarqube') {
+                    echo '####################### BUILDING QA'
+                    dir ('mads-todolist-inicial') {
+                        script {
+                        //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
+  -Dsonar.projectKey=demo \
+  -Dsonar.projectName=qa \
+  -Dsonar.host.url=http://${SonarServer}:9000 \
+  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+                                sleep 10
+				sh ' echo STATIC ANALYSIS'
+                                sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
+                                sh 'curl ${SonarServer}:9000/api/qualitygates/project_status?projectKey=demo -o qualityGate.json'
+                                qualitygate = readJSON file:'qualityGate.json'
+                                echo "${qualitygate.projectStatus.status}"
+                                if ("${qualitygate.projectStatus.status}" == "ERROR") {
+				    currentBuild.result = 'FAILURE'
+				    error('SonarQube quality gate status of a project is failed.')
+				}
+                        }
+                        }
+                    }
+               }
+            }
+        }
+	stage ('Continuos Delivery Deploy QA') {
+            when {
+                branch 'release' 
+            }
+            steps {
+              dir ('k8s') {
+		script {
+                           sh 'docker build -t msdemoqa:0.0.1 dockerized/.'
+                           sh 'docker tag msdemoqa:0.0.1 uaemmx01/msdemoqa:0.0.1'
+                           sh 'docker push uaemmx01/msdemoqa:0.0.1'
+                           withKubeConfig([credentialsId: 'minikube']) {
+                                sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoqa:0.0.1/g"| kubectl apply -n qa -f -'''
+			//	sh 'kubectl apply -f deployment.yaml -n qa'
+                          	sleep 20
+				sh 'kubectl scale deployment msdemo --replicas=0 -n qa'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n qa'
+ 			   }
+		}
+              }
+            }
+	}
+	stage ('Continuos Integration Deploy PRD') {
+            when {
+                branch 'master' 
+            }
+            steps {
+	//	input message: 'Finished using the web site...? (Click "Proceed" to continue)'
+               withSonarQubeEnv('Sonarqube') {
+                    echo '####################### BUILDING PRD'
+                    dir ('mads-todolist-inicial') {
+                        script {
+                        //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
+  -Dsonar.projectKey=prd \
+  -Dsonar.projectName=prd \
+  -Dsonar.host.url=http://${SonarServer}:9000 \
+  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+                                sleep 10
+				sh ' echo STATIC ANALYSIS'
+                                sh 'cp target/mads-todolist-inicial-1.0.0.war ../k8s/dockerized/'
+                                sh 'curl ${SonarServer}:9000/api/qualitygates/project_status?projectKey=prd -o qualityGate.json'
+                                qualitygate = readJSON file:'qualityGate.json'
+                                echo "${qualitygate.projectStatus.status}"
+                                if ("${qualitygate.projectStatus.status}" == "ERROR") {
+				    currentBuild.result = 'FAILURE'
+				    error('SonarQube quality gate status of a project is failed.')
+				}
+                        }
+                        }
+                    }
+               }
+            }
+        }
+	stage ('Continuos Delivery Deploy PRD') {
+            when {
+                branch 'master' 
+            }
+            steps {
+              dir ('k8s') {
+		script {
+                           sh 'docker build -t msdemoprd:0.0.1 dockerized/.'
+                           sh 'docker tag msdemoprd:0.0.1 uaemmx01/msdemoprd:0.0.1'
+                           sh 'docker push uaemmx01/msdemoprd:0.0.1'
+                           withKubeConfig([credentialsId: 'minikube']) {
+                                sh '''cat deployment.yaml|sed 's/msdemo:0.0.1'"/msdemoprd:0.0.1/g"| kubectl apply -n prd -f -'''
+			//	sh 'kubectl apply -f deployment.yaml -n prd'
+                          	sleep 20
+				sh 'kubectl scale deployment msdemo --replicas=0 -n prd'
+				sh 'kubectl scale deployment msdemo --replicas=1 -n prd'
+ 			   }
+		}
+              }
+            }
+	}
+   }
+   post {
+        always {
+            echo 'One way or another, I have finished'
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
+    }
+}
+

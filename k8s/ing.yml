@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: msdemo
+  namespace: qa
+spec:
+  rules:
+  - host: demo.qa.local
+    http:
+      paths:
+      - path: /mads-todolist-inicial-1.0.0
+        backend:
+          serviceName: msdemo
+          servicePort: 80

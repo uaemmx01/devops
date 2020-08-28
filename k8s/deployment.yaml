@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msdemo
+  labels:
+          app: msdemo
+spec:
+  replicas: 1
+  selector:
+          matchLabels:
+                  app: msdemo
+  template:
+    metadata:
+      labels:
+        app: msdemo
+    spec:
+      containers:
+      - name: msdemo
+        image:  uaemmx01/msdemo:0.0.1
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+

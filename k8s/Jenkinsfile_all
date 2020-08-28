@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven'
+        jdk 'jdk8'
+    }
+
+   stages {
+        stage('Build payara asekt'){
+            environment {
+                VERSIONID = "0.0.1"
+                ARTIFACTID = "ASEKTConfiguracion"
+                REPOID = "maven-releases"
+                DOCKERTAG = "msasekt:0.0.1"
+            }
+            steps {
+                withMaven(
+                maven: "maven",
+                mavenSettingsConfig: '1b3bfabf-9331-4ce7-b9af-c18bbc3065ae',
+                        options: [
+                            artifactsPublisher(disabled: true),
+                            findbugsPublisher(disabled: true),
+                            openTasksPublisher(disabled: true)
+                ]) {
+                    echo '####################### BUILDING ASEKT'
+                    dir ('ASEKTConfiguracion') {
+                        script {
+                        status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
+                        echo "******************************************************************** Status:  ${status} "
+                        if (status == 0) {
+                           sh 'mvn deploy:deploy-file -DgroupId=asekt.configuraciones   -DartifactId=${ARTIFACTID}   -Dversion=${VERSIONID}   -Dpackaging=war   -DgeneratePom=true   -Dfile=target/${ARTIFACTID}-${VERSIONID}-SNAPSHOT.war   -DrepositoryId=${REPOID}   -Durl=http://172.31.34.128:8081/repository/${REPOID}'
+                           sh '''cat ../k8s/dockerized/msasekt.yaml|sed 's/ARTIFACTID'"/$ARTIFACTID/g"|sed 's/VERSIONID'"/$VERSIONID/g" | kubectl apply -f -'''
+                        }
+                        }
+                    }
+                }
+            }
+       }
+
+
+        stage('Redeployement '){
+                steps{
+                        sh 'kubectl scale deployment msasekt --replicas=0 -n asekt'
+                        sh 'kubectl scale deployment msasekt --replicas=1 -n asekt'
+                        echo ' ################################################### POD LOG'
+                        sh '''sleep 100; kubectl -n asekt logs `kubectl -n asekt get pods |grep msasekt |grep -v Terminating|awk '{print $1}' |tail -1`'''
+                }
+        }
+
+
+   }
+   post {
+        always {
+            echo 'One way or another, I have finished'
+        }
+        success {
+            echo 'I succeeeded!'
+        }
+        unstable {
+            echo 'I am unstable :/'
+        }
+        failure {
+            echo 'I failed :('
+        }
+        changed {
+            echo 'Things were different before...'
+        }
+    }
+}
+
