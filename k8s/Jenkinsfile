@@ -19,7 +19,7 @@ pipeline {
   -Dsonar.projectKey=dev \
   -Dsonar.projectName=dev \
   -Dsonar.host.url=http://${SonarServer}:9000 \
-  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+  -Dsonar.login=e5ea1f338ea5bc1ac594addc12e6eef934e65470')
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
                                 sleep 10
@@ -69,10 +69,10 @@ pipeline {
                         script {
                         //status = sh (returnStatus: true, script: 'mvn clean package -DistTest')
                         status = sh (returnStatus: true, script: 'mvn clean package -DistTest sonar:sonar \
-  -Dsonar.projectKey=demo \
+  -Dsonar.projectKey=qa \
   -Dsonar.projectName=qa \
   -Dsonar.host.url=http://${SonarServer}:9000 \
-  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+  -Dsonar.login=e5ea1f338ea5bc1ac594addc12e6eef934e65470')
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
                                 sleep 10
@@ -127,7 +127,7 @@ pipeline {
   -Dsonar.projectKey=prd \
   -Dsonar.projectName=prd \
   -Dsonar.host.url=http://${SonarServer}:9000 \
-  -Dsonar.login=471685943f484024fb3437d74f97dd653a116016')
+  -Dsonar.login=e5ea1f338ea5bc1ac594addc12e6eef934e65470')
                         echo "******************************************************************** Status:  ${status} "
                         if (status == 0) {
                                 sleep 10
