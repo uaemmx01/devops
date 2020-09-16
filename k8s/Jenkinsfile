@@ -4,6 +4,9 @@ pipeline {
         SonarServer = 'localhost'
         ImageName = 'ct:latest'
    }
+   tools {
+        maven 'Maven'
+    }
    stages {
         stage('Continuous Integration Build DEV'){
             when {
