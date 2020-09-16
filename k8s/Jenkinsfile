@@ -1,7 +1,7 @@
 pipeline {
    agent any
    environment {
-        SonarServer = 'localhost'
+        SonarServer = '172.17.0.3'
         ImageName = 'ct:latest'
    }
    tools {
